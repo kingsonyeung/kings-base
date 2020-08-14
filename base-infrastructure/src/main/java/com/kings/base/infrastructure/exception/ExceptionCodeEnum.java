@@ -5,6 +5,9 @@ package com.kings.base.infrastructure.exception;
  */
 public enum ExceptionCodeEnum {
 
+
+    ACCESS_DENY(403, "无权限！"),
+
     SYSTEM_ERROR(500, "服务器开小差！"),
 
     ARGUMENT_NOT_VALID_EXCEPTION(501, "参数异常");

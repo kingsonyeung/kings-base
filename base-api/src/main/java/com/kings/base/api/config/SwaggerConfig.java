@@ -32,6 +32,8 @@ public class SwaggerConfig {
                 .parameterType("header")
                 .required(true)
                 .build();
+        parameter.name("Authorization").description("令牌").modelRef(new ModelRef("string")).parameterType("header")
+                .required(false).build();
         List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(parameter.build());
         return new Docket(DocumentationType.SWAGGER_2)

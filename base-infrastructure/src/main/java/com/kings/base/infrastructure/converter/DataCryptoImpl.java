@@ -7,6 +7,7 @@ import com.kings.base.infrastructure.vo.ResponseVO;
 import org.springframework.util.Base64Utils;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Created on 2019/11/18.
@@ -15,20 +16,30 @@ public class DataCryptoImpl implements DataCrypto {
 
     /**
      * 解密
+     *
      * @param aClass
      * @param requestVO
      * @return
      */
     @Override
     public boolean checkSignAndDecrypt(Class aClass, RequestVO requestVO) {
-        byte[] bytes = Base64Utils.decodeFromString(requestVO.getPayload().toString());
-        String payload = new String(bytes);
-        requestVO.setPayload(JSONObject.parseObject(payload, aClass));
+        String body = requestVO.getPayload().toString();
+        if (isBase64(body)) {
+            byte[] bytes = Base64Utils.decodeFromString(body);
+            body = new String(bytes);
+        }
+        requestVO.setPayload(JSONObject.parseObject(body, aClass));
         return true;
+    }
+
+    private boolean isBase64(String str) {
+        String base64Pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
+        return Pattern.matches(base64Pattern, str);
     }
 
     /**
      * 加密
+     *
      * @param responseVO
      * @return
      */

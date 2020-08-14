@@ -11,6 +11,6 @@ public class IndexController {
 
     @GetMapping(value = "/")
     public String index() {
-        return "Welcome to xxxx!";
+        return "Welcome to Kings-Base!";
     }
 }
