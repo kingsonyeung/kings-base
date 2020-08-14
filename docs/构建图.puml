@@ -1,0 +1,23 @@
+@startuml
+node "对外服务" {
+[api]
+}
+
+[api] --> [business]
+
+node "调度服务" {
+[schedule]
+}
+
+[schedule] --> [business]
+
+
+[business] -->  [domain]
+[domain] -> [infrastructure]
+
+[domain] --> DB
+
+database "DB" {
+}
+
+@enduml

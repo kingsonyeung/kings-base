@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- 启动定时扫描更新机制 -->
+<configuration scan="true" scanPeriod="60 seconds">
+    <property name="APPLICATION_NAME" value="xxxx"/>
+    <!--Gray开发测试环境配置-->
+    <property name="GELF_HOST" value="udp:alpha-log.cedarhd.com"/>
+    <property name="GELF_PORT" value="30115"/>
+    <springProfile name="prod">
+        <!--Gray生产环境配置-->
+        <property name="GELF_HOST" value="udp:log.cedarhd.com"/>
+        <property name="GELF_PORT" value="30115"/>
+    </springProfile>
+
+    <!-- 控制台日志输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 典型的日志pattern -->
+        <encoder>
+            <pattern>[%date{ISO8601}] [%level] %logger{80} [%thread] [%X{TRACE_ID}] ${APPLICATION_NAME} ${HOSTNAME} ${PID} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 生成日志文件 -->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender" level="INFO">
+        <file>/app/Server.Log/${APPLICATION_NAME}/${APPLICATION_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/app/Server.Log/${APPLICATION_NAME}/${APPLICATION_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%date{ISO8601}] [%level] %logger{80} [%thread] [%X{TRACE_ID}] ${APPLICATION_NAME} ${HOSTNAME} ${PID} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <springProfile name="prod">
+        <!-- 输出到graylog -->
+        <appender name="GELF" class="biz.paluch.logging.gelf.logback.GelfLogbackAppender">
+            <host>${GELF_HOST}</host>
+            <port>${GELF_PORT}</port>
+            <version>1.1</version>
+            <maximumMessageSize>2048000</maximumMessageSize>
+            <extractStackTrace>true</extractStackTrace>
+            <filterStackTrace>true</filterStackTrace>
+            <includeLocation>true</includeLocation>
+            <timestampPattern>yyyy-MM-dd HH:mm:ss.SSS</timestampPattern>
+            <additionalFields>
+                Application=${APPLICATION_NAME},
+                Hostname=${HOSTNAME},
+                PID=${PID},
+            </additionalFields>
+            <mdcFields>
+                TRACE_ID
+            </mdcFields>
+        </appender>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="console"/>
+            <appender-ref ref="file"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="console"/>
+            <appender-ref ref="file"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="file"/>
+            <appender-ref ref="GELF"/>
+        </root>
+    </springProfile>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+    </root>
+</configuration>
